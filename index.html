@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataForest - Çevresel Risk Analizi</title>
+
+  <!-- Fontlar -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Outfit:wght@100..900&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar-wrapper">
+    <header class="navbar" id="navbar">
+      <div class="nav-brand group" id="brand-logo">
+        <div class="nav-logo-box">
+          <img src="./images/nav.jpeg" alt="DataForest logo" decoding="async" />
+        </div>
+        <div class="nav-brand-text text-gold-gradient">
+          DataForest
+        </div>
+      </div>
+      <button class="nav-btn" id="nav-btn">Model Sonuçları</button>
+    </header>
+  </div>
+
+  <main>
+    <!-- HERO SCROLL SEQUENCE -->
+    <section class="hero-sequence-wrapper">
+      <!-- Loading indicator -->
+      <div class="loader-container" id="loader">
+        <div class="loader-bg">
+          <div class="loader-fill" id="loader-fill"></div>
+        </div>
+        <div class="loader-text" id="loader-text">0 / 150 Yükleniyor...</div>
+      </div>
+
+      <!-- Canvas Sticky Container -->
+      <div class="sticky-container">
+        <canvas id="hero-canvas"></canvas>
+
+        <div class="hero-overlays">
+          <div class="hero-block" id="hero-block-1">
+            <div class="hero-title large">DataForest.</div>
+            <div class="hero-subtitle tracking">Yapay Zeka Destekli Çevresel Risk Analizi</div>
+          </div>
+
+          <div class="hero-block" id="hero-block-2">
+            <div class="hero-title">Açık Veriden İçgörüye.</div>
+            <div class="hero-desc">PM2.5, PM10, sıcaklık, karbon salımı ve orman değişimi verileri tek akışta birleşir.
+            </div>
+          </div>
+
+          <div class="hero-block" id="hero-block-3">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HERITAGE SECTION -->
+    <section id="heritage" class="section padding-y">
+      <div class="container relative">
+        <div class="divider"></div>
+
+        <div class="grid cols-2 align-center gap-1">
+          <div class="card reveal-left">
+            <img src="./images/nav.jpeg" alt="DataForest çevresel risk analiz sahnesi" class="heritage-img"
+              loading="lazy" decoding="async">
+          </div>
+
+          <div class="reveal-right">
+            <div class="badge-text uppercase tracking-widest text-aegean-200">PROJE AMACI</div>
+            <h2 class="section-title">Çevresel Riski Erken Görmek</h2>
+            <p class="section-desc">
+              DataForest, açık kaynak çevresel veri setlerini birleştirerek yerel ölçekte risk sınıflandırması ve eğilim
+              tahmini üreten bir karar destek prototipidir. Sistem; veri ön işleme, özellik mühendisliği ve algoritma
+              karşılaştırmasını tek bir akış içinde sunar. Böylece öğrenciler, ham istatistiği uygulanabilir karara
+              dönüştürebilir.
+            </p>
+
+            <div class="flex-wrap gap-3 badges">
+              <span>PM2.5 / PM10</span>
+              <span>Karbon Salımı</span>
+              <span>Orman Alanı Değişimi</span>
+            </div>
+
+            <div class="grid cols-3 gap-6 margin-t-40 circle-stats">
+              <div class="circle-stat">
+                <div class="circle-val">4+</div>
+                <div class="circle-label">Veri Parametresi</div>
+              </div>
+              <div class="circle-stat">
+                <div class="circle-val">3</div>
+                <div class="circle-label">Model Ailesi</div>
+              </div>
+              <div class="circle-stat">
+                <div class="circle-val">k-fold</div>
+                <div class="circle-label">Doğrulama</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- RITUAL SECTION -->
+    <section id="ritual" class="section padding-y text-center text-center-mx">
+      <div class="divider mx-auto"></div>
+
+      <div class="container narrow">
+        <div class="badge-text uppercase tracking-widest text-aegean-200">METODOLOJİ</div>
+        <h2 class="section-title">Analiz İş Akışı</h2>
+        <div class="section-desc space-y">
+          <p>DataForest; TÜİK ve uluslararası açık veri kaynaklarından toplanan zaman serisi verilerini tek bir formatta
+            birleştirir. Pearson korelasyon analizi ile anlamlı değişkenler seçilir, model girişleri optimize edilir.
+          </p>
+          <p>Veri seti %80 eğitim ve %20 test olarak ayrılır; k-fold çapraz doğrulama ile sistemin genellenebilirliği
+            ölçülür. En yüksek performanslı model, aktif tahmin motoruna atanır.</p>
+        </div>
+
+        <div class="grid cols-3 gap-8 margin-t-64 stagger-reveal">
+          <div class="card p-8 reveal-up box-hover">
+            <svg viewBox="0 0 24 24" class="icon mx-auto mb-4">
+              <path d="M12 2C9 6.2 6 9.6 6 13.2C6 16.96 8.69 20 12 20C15.31 20 18 16.96 18 13.2C18 9.6 15 6.2 12 2Z"
+                stroke="currentColor" fill="none" stroke-width="1.5" stroke-linejoin="round" />
+            </svg>
+            <div class="card-title text-xl">Ön İşleme</div>
+            <div class="card-desc">Eksik veri temizleme, IQR aykırı değer analizi ve Min-Max normalizasyon</div>
+          </div>
+          <div class="card p-8 reveal-up box-hover" style="transition-delay: 150ms;">
+            <svg viewBox="0 0 24 24" class="icon mx-auto mb-4">
+              <path d="M7.5 12.5V9.2C7.5 8.54 8.04 8 8.7 8C9.36 8 9.9 8.54 9.9 9.2V12.5" stroke="currentColor"
+                fill="none" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M9.9 12.5V8.6C9.9 7.72 10.62 7 11.5 7C12.38 7 13.1 7.72 13.1 8.6V12.5" stroke="currentColor"
+                fill="none" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M13.1 12.5V9.2C13.1 8.54 13.64 8 14.3 8C14.96 8 15.5 8.54 15.5 9.2V13.7" stroke="currentColor"
+                fill="none" stroke-width="1.5" stroke-linecap="round" />
+              <path
+                d="M7.2 12.8L6.6 12.4C5.9 11.94 5.0 12.12 4.52 12.8C4.02 13.52 4.2 14.52 4.92 15.02L7.5 16.8C8.44 17.45 9.56 17.8 10.7 17.8H13.4C15.98 17.8 18.1 15.68 18.1 13.1V12.5"
+                stroke="currentColor" fill="none" stroke-width="1.5" stroke-linejoin="round" />
+            </svg>
+            <div class="card-title text-xl">Modelleme</div>
+            <div class="card-desc">Lineer Regresyon, Random Forest ve KNN ile karşılaştırmalı tahmin</div>
+          </div>
+          <div class="card p-8 reveal-up box-hover" style="transition-delay: 300ms;">
+            <svg viewBox="0 0 24 24" class="icon mx-auto mb-4">
+              <path d="M4 9C8 9 10 7 13 7C16 7 18 8 20 8" stroke="currentColor" fill="none" stroke-width="1.5"
+                stroke-linecap="round" />
+              <path d="M4 13C9 13 11 11 14 11C17 11 18.5 12 20 12" stroke="currentColor" fill="none" stroke-width="1.5"
+                stroke-linecap="round" />
+              <path d="M4 17C8 17 10 15.5 13 15.5C16 15.5 18 16.5 20 16.5" stroke="currentColor" fill="none"
+                stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+            <div class="card-title text-xl">Karar Desteği</div>
+            <div class="card-desc">Risk sınıfları, trend grafikleri ve bölgesel öngörü panelleri</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOWCASE SECTION -->
+    <section id="showcase" class="section padding-y">
+      <div class="container container-large">
+        <div class="divider mx-auto"></div>
+        <div class="text-center narrow mx-auto">
+          <div class="badge-text tracking-widest text-aegean-200">MODÜLLER</div>
+          <h2 class="section-title">GRAFİKLERİMİZ</h2>
+        </div>
+
+        <div class="grid cols-2 gap-6 showcase-grid margin-t-64 mx-auto max-w-5xl">
+          <!-- Kart Yapıları JS tarafından eklenecek ya da manuel kopyalanacak -->
+          <!-- Demo: 1 -->
+          <div class="showcase-card reveal-up">
+            <div class="img-wrapper">
+              <img src="./images/indir.png" alt="Hava kalitesi katmanı">
+              <div class="img-gradient"></div>
+              <div class="showcase-content">
+                <div class="showcase-title">Hava Kalitesi</div>
+                <div class="showcase-desc-wrapper">
+                  <div class="showcase-desc">PM2.5 ve PM10 değişimlerini takip ederek bölgesel risk sınıflandırması
+                    üretir.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Demo: 2 -->
+          <div class="showcase-card reveal-up">
+            <div class="img-wrapper">
+              <img src="./images/indir1.png" alt="Sıcaklık trendleri katmanı">
+              <div class="img-gradient"></div>
+              <div class="showcase-content">
+                <div class="showcase-title">Sıcaklık Trendleri</div>
+                <div class="showcase-desc-wrapper">
+                  <div class="showcase-desc">Yıllık sıcaklık ortalamalarından eğilim çıkarımı ve gelecek dönem tahmini.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUY SECTION -->
+    <section id="model-results" class="section padding-y text-center-mx" style="max-width: 896px;">
+      <div class="divider mx-auto"></div>
+
+      <div class="card p-16 card-large reveal-up">
+        <div class="badge-text uppercase tracking-widest text-aegean-200">MODEL SONUÇLARI</div>
+        <h2 class="section-title margin-b-2">Aktif Tahmin Motoru</h2>
+        <div class="score-text">%91.4</div>
+        <div class="score-desc">/ En iyi F1-Score (Random Forest)</div>
+
+        <div class="flex-wrap gap-3 justify-center margin-b-32 badges">
+          <span>Accuracy</span>
+          <span>Precision</span>
+          <span>Recall</span>
+          <span>MSE</span>
+        </div>
+
+        <div class="list-features">
+          <div>📍 Risk seviyesi: Düşük / Orta / Yüksek sınıflandırması</div>
+          <div>📈 Gelecek dönem çevresel eğilim tahmin grafikleri</div>
+          <div>✅ Modüler yapı: yeni şehir ve veri setleri kolay entegre edilir</div>
+        </div>
+
+        <div class="btn-group">
+          <button id="btn-run" class="btn btn-primary">Tahmin Çalıştır</button>
+          <button id="btn-report" class="btn btn-outline">Raporu Gör</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="footer" class="footer">
+    <div class="container container-large">
+      <div class="grid cols-4 gap-10">
+        <div>
+          <div class="footer-brand font-cormorant text-gold-gradient">DataForest</div>
+          <div class="footer-desc">Yapay Zeka Destekli Çevresel Analiz Platformu</div>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-title">Analiz Modülleri</div>
+          <ul>
+            <li><a href="#heritage">Hava Kalitesi Analizi</a></li>
+            <li><a href="#heritage">Karbon Salımı Takibi</a></li>
+            <li><a href="#heritage">Orman Kaybı İzleme</a></li>
+            <li><a href="#model-results">Trend Tahmin Motoru</a></li>
+            <li><a href="#model-results">Risk Sınıflandırma</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-title">Proje</div>
+          <ul>
+            <li><a href="#heritage">Proje Özeti</a></li>
+            <li><a href="#ritual">Metodoloji</a></li>
+            <li><a href="#model-results">Model Sonuçları</a></li>
+            <li><a href="#footer">Teknik Rapor</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-col-title">Bülten</div>
+          <div class="footer-desc mb-3">Yeni veri setleri ve model güncellemelerinden haberdar ol.</div>
+
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 DataForest. Tüm hakları saklıdır.</div>
+        <div>Gizlilik Politikası · Kullanım Koşulları</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- IMAGE MODAL -->
+  <div id="image-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close-btn">&times;</button>
+      <img id="modal-img" src="" alt="Büyük Görsel">
+      <div class="modal-info">
+        <h3 id="modal-title" class="modal-title font-cormorant text-xl"></h3>
+        <p id="modal-desc" class="modal-desc text-aegean-50"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

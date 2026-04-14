@@ -1,0 +1,100 @@
+DataForest - Proje Bilgisi
+Tarih: 2026-04-14
+
+1) Proje Ozeti
+- Proje adi: DataForest
+- Amac: Yapay zeka destekli cevresel risk analiz ve egilim tahmini
+- Teknoloji: Next.js 14 (App Router), TypeScript (strict), Tailwind CSS, Framer Motion, Canvas API
+- Frame sequence: /public/images/kolonya/ezgif-frame-001.jpg ... ezgif-frame-150.jpg
+
+2) Klasor ve Dosya Yapisi
+DataForest/
+|-- app/
+|   |-- globals.css
+|   |-- layout.tsx
+|   `-- page.tsx
+|-- components/
+|   |-- BuySection.tsx
+|   |-- Footer.tsx
+|   |-- HeritageSection.tsx
+|   |-- HeroScrollSequence.tsx
+|   |-- HeroTextOverlays.tsx
+|   |-- KolonyaRitualSection.tsx
+|   |-- Loader.tsx
+|   `-- Navbar.tsx
+|-- public/
+|   `-- images/
+|       `-- kolonya/
+|           `-- ezgif-frame-001.jpg ... ezgif-frame-150.jpg
+|-- next-env.d.ts
+|-- next.config.mjs
+|-- package.json
+|-- postcss.config.mjs
+|-- tailwind.config.ts
+|-- tsconfig.json
+`-- PROJE_BILGISI.txt
+
+3) Onemli Notlar
+- Static export acik: next.config.mjs -> output: 'export'
+- Next image optimize kapali: images.unoptimized = true
+- Fontlar: Cormorant Garamond + Outfit (next/font/google)
+- Ana sayfa: scroll-driven canvas sequence + veri odakli icerik bolumleri
+- Build dogrulamasi: npm run build basarili
+
+4) Dosya Gorev Haritasi (Nerede Ne Var?)
+- app/layout.tsx
+  -> Uygulamanin ana kabugu.
+  -> Fontlar burada tanimlanir.
+  -> Navbar burada cagrilir (tum sayfada sabit gorunur).
+  -> Metadata (title, description) burada.
+
+- app/page.tsx
+  -> Ana sayfanin bolum sirasi burada birlestirilir:
+     HeroScrollSequence -> HeritageSection -> KolonyaRitualSection -> BuySection -> Footer
+
+- components/Navbar.tsx
+  -> Ust sabit bar (logo/marka + Model Sonuclari butonu).
+  -> Scroll olunca blur ve arka plan efekti burada.
+
+- components/Loader.tsx
+  -> Tam ekran yukleme katmani.
+  -> Frame yukleme ilerleme cubugu burada.
+  -> Tum frameler yuklenene kadar scroll kilidi burada.
+
+- components/HeroScrollSequence.tsx
+  -> Canvas tabanli frame oynatma motoru.
+  -> 150 frame preload burada.
+  -> Scroll -> frame index donusumu burada.
+  -> HeroTextOverlays buradan cagrilir.
+
+- components/HeroTextOverlays.tsx
+  -> Hero ustundeki 4 adet metin katmani.
+  -> Scroll araligina gore opacity/y animasyonlari burada.
+
+- components/HeritageSection.tsx
+  -> Proje amaci ve temel parametreler bolumu.
+  -> Sag/sol iki kolonlu tanitim icerigi burada.
+
+- components/KolonyaRitualSection.tsx
+  -> Metodoloji bolumu (On Isleme, Modelleme, Karar Destegi kartlari).
+  -> Framer Motion ile kart giris animasyonlari burada.
+
+- components/BuySection.tsx
+  -> Model sonuc karti (aktif tahmin motoru, metrikler, butonlar).
+  -> id="model-results" hedef alani burada.
+
+- components/Footer.tsx
+  -> Alt bilgi, baglantilar ve bulten formu burada.
+
+- app/globals.css
+  -> Global stiller: arka plan gradyan, secim rengi, scrollbar gizleme, ortak utility'ler.
+
+- tailwind.config.ts
+  -> Ozel renk paleti (aegean) ve font aileleri burada.
+
+- next.config.mjs
+  -> Static export ve image ayarlari.
+
+- tsconfig.json
+  -> TypeScript strict kurallari ve path alias ayarlari.
+
