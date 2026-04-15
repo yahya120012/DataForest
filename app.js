@@ -126,11 +126,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    const rect = canvas.getBoundingClientRect();
-    const cssWidth = Math.max(1, Math.floor(rect.width));
-    const cssHeight = Math.max(1, Math.floor(rect.height));
-    const targetW = Math.floor(cssWidth * dpr);
-    const targetH = Math.floor(cssHeight * dpr);
+
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+
+    canvas.style.width = vw + 'px';
+    canvas.style.height = vh + 'px';
+
+    const targetW = Math.floor(vw * dpr);
+    const targetH = Math.floor(vh * dpr);
 
     if (canvas.width !== targetW || canvas.height !== targetH) {
       canvas.width = targetW;
@@ -142,23 +148,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if ('imageSmoothingQuality' in ctx) {
       ctx.imageSmoothingQuality = 'high';
     }
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
+    ctx.clearRect(0, 0, vw, vh);
 
     // "cover" fit
     const imgRatio = img.naturalWidth / img.naturalHeight;
-    const canvasRatio = cssWidth / cssHeight;
+    const canvasRatio = vw / vh;
     let drawWidth, drawHeight, drawX, drawY;
 
     if (imgRatio > canvasRatio) {
-      drawHeight = cssHeight;
-      drawWidth = cssHeight * imgRatio;
-      drawX = (cssWidth - drawWidth) / 2;
+      drawHeight = vh;
+      drawWidth = vh * imgRatio;
+      drawX = (vw - drawWidth) / 2;
       drawY = 0;
     } else {
-      drawWidth = cssWidth;
-      drawHeight = cssWidth / imgRatio;
+      drawWidth = vw;
+      drawHeight = vw / imgRatio;
       drawX = 0;
-      drawY = (cssHeight - drawHeight) / 2;
+      drawY = (vh - drawHeight) / 2;
     }
 
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
