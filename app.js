@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getChartShape = (chartId) => {
       if (chartId === 'tuik-chart-0') return 'bar';
       if (chartId === 'tuik-chart-1') return 'pie';
-      if (chartId === 'tuik-chart-2') return 'atrea';
+      if (chartId === 'tuik-chart-2') return 'area';
       if (chartId === 'tuik-chart-3') return 'dotline';
       return 'line';
     };
@@ -652,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const shape = getChartShape(chartId);
       if (shape === 'bar') return makeBarOption(times, values, title, unit);
       if (shape === 'pie') return makePieOption(times, values, title, unit);
-      if (shape === 'scatter') return makeScatterOption(times, values, title, unit);
+      if (shape === 'area') return makeScatterOption(times, values, title, unit);
       if (shape === 'dotline') return makeDottedLineOption(times, values, title, unit);
       return makeLineOption(times, values, title, unit);
     };
@@ -773,7 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal handlers
     const chartModal = document.getElementById('chart-modal');
     const chartModalClose = document.getElementById('chart-modal-close');
-    const chartModalMap = document.getElementById('#türk');
+    const chartModalMap = document.getElementById('chart-modal-map');
     const chartModalLine = document.getElementById('chart-modal-line');
     const chartModalInfo = document.getElementById('chart-modal-info');
 
@@ -974,7 +974,5 @@ document.addEventListener('DOMContentLoaded', () => {
       setStatus(mapCfg.statusId, 'Veri işleme hatası', false);
     }
   })();
-
-
 
 });
