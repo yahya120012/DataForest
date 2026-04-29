@@ -1115,6 +1115,7 @@ main {
 .chart-canvas {
   width: 100%;
   cursor: pointer;
+  
 }
 
 .chart-canvas-line {
@@ -1149,6 +1150,7 @@ main {
 
 .chart-canvas-modal-map {
   height: 480px;
+
 }
 
 .chart-modal-info {

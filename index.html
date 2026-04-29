@@ -89,6 +89,41 @@
   flex: 1;
 }
 
+
+.chart-canvas img{
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.tuik-expand-btn{
+  float: right;
+  cursor: pointer;
+  padding: 6px 10px;
+  border: none;
+  background: #1f6feb;
+  color: white;
+  border-radius: 6px;
+}
+
+.modal{
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content{
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+
 </style>
 <body>
 
@@ -285,7 +320,7 @@
               </div>
 
               <div class="card chart-card">
-                <div class="chart-card-header">Belediye Su Göstergeleri</div>
+                <div class="chart-card-header">Belediye Atık Su Göstergeleri</div>
                 <button class="tuik-expand-btn" type="button" data-tuik-expand="line" data-chart-id="tuik-chart-3">Büyüt</button>
                 <div id="tuik-chart-3" class="chart-canvas chart-canvas-line"></div>
                 <div id="tuik-chart-3-status" class="chart-card-status">Yükleniyor...</div>
@@ -382,7 +417,86 @@
           <button id="btn-report" class=""></button>
         </div>
       </div>
-    </section>
+
+
+
+
+      <section id="showcase" class="section padding-y">
+        <div class="container container-large">
+          <div class="text-center narrow mx-auto">
+            <div class="badge-text tracking-widest text-aegean-200">
+              MODÜLLER
+            </div>
+          
+            <h2 class="section-title">
+              Çevresel Verilerin Görselleştirilmesi ve Tahmin Analizi
+            </h2>
+          
+            <p class="section-subtitle">
+              Bu çalışma yapay zeka destekli analiz ve görselleştirme teknikleri kullanılarak hazırlanmıştır.
+            </p>
+          </div>
+          
+          <div class="tuik-dashboard-grid">
+      
+            <!-- Kart 1 -->
+            <div class="card chart-card">
+              <div class="chart-card-header">
+                Sera Gazı Emisyon Değişim Oranının Tahmini
+                <button class="tuik-expand-btn" onclick="openModal('images/tahin1.jpeg')">
+                  Büyüt
+                </button>
+              </div>
+      
+              <div class="chart-canvas">
+                <img src="images/tahin1.jpeg" alt="Emisyon Grafiği">
+              </div>
+            </div>
+      
+            <!-- Kart 2 -->
+            <div class="card chart-card">
+              <div class="chart-card-header">
+                İçme-Kullanma Tesisleri Degişim Oranının Tahmini
+                <button class="tuik-expand-btn" data-img="images/tahin2.png">
+                  Büyüt
+                </button>
+              </div>
+      
+              <div class="chart-canvas">
+                <img src="images/tahin2.png" alt="Sera Gazı">
+              </div>
+            </div>
+              <!-- Kart 3 -->
+            <div class="card chart-card">
+              <div class="chart-card-header">
+                Sera Gazı Emisyon Değişim Oranının Tahmini
+                <button class="tuik-expand-btn" data-img="images/tahin1.jpeg">
+                  Büyüt
+                </button>
+              </div>
+      
+              <div class="chart-canvas">
+                <img src="images/tahin1.jpeg" alt="Sera Gazı">
+              </div>
+            </div>
+            <!-- Kart 4 -->
+            <div class="card chart-card">
+              <div class="chart-card-header">
+                Sera Gazı Emisyon Değişim Oranının Tahmini
+                <button class="tuik-expand-btn" data-img="images/tahin1.jpeg">
+                  Büyüt
+                </button>
+              </div>
+      
+              <div class="chart-canvas">
+                <img src="images/tahin1.jpeg" alt="Sera Gazı">
+              </div>
+            </div>
+      
+          </div>
+        </div>
+      </section>  
+    
 
   </main>
 
@@ -453,6 +567,22 @@
       </div>
     </div>
   </div>
+
+
+  <div id="imageModal" class="modal" onclick="closeModal()">
+    <img id="modalImg" class="modal-content">
+  </div>
+  
+  <script>
+  function openModal(src) {
+    document.getElementById("imageModal").style.display = "flex";
+    document.getElementById("modalImg").src = src;
+  }
+  
+  function closeModal() {
+    document.getElementById("imageModal").style.display = "none";
+  }
+  </script>
 
   <!-- ECharts -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>

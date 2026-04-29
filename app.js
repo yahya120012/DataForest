@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getChartShape = (chartId) => {
       if (chartId === 'tuik-chart-0') return 'bar';
       if (chartId === 'tuik-chart-1') return 'pie';
-      if (chartId === 'tuik-chart-2') return 'area';
+      if (chartId === 'tuik-chart-2') return 'atae';
       if (chartId === 'tuik-chart-3') return 'dotline';
       return 'line';
     };
@@ -797,16 +797,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const unit = mapSeries.unitMeasure || '';
       chartModalInfo.innerHTML = `
-        <div style="font-family: var(--font-cormorant); font-size: 1.5rem; font-weight: 700; color: rgba(111,187,213,1); margin-bottom: .5rem;">
-          ${mapCfg.title}
-        </div>
-        <div>Seçili bölge: <b>${regionName}</b></div>
-        <div>Son dönem: <b>${latestYear}</b></div>
-        <div>Değer: <b>${fmt(latestValue)}</b> ${unit}</div>
-        <div style="margin-top:.5rem; color: rgba(244,250,246,0.6); font-size: .9rem;">
-          Not: Bu prototipte tüm seriler aynı TIME_PERIOD’te toplanarak tek bir trend oluşturuldu.
-        </div>
-      `;
+  <div style="font-family: var(--font-cormorant); font-size: 1.5rem; font-weight: 700; color: rgba(111,187,213,1); margin-bottom: .5rem;">
+    ${mapCfg.title}
+  </div>
+  <div>Seçili bölge: <b>${regionName}</b></div>
+  <div>Son dönem: <b>${latestYear}</b></div>
+  <div>Değer: <b>${formatNumber(latestValue)}</b> ${unit}</div>
+  <div style="margin-top:.5rem; color: rgba(244,250,246,0.6); font-size: .9rem;">
+    Not: Bu prototipte tüm seriler aynı TIME_PERIOD’te toplanarak tek bir trend oluşturuldu.
+  </div>
+`;
 
       const mapDomId = chartModalMap && chartModalMap.id ? chartModalMap.id : 'chart-modal-map';
       if (!modalMapChart) {
