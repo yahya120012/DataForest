@@ -1048,3 +1048,118 @@ main {
   color: rgba(244, 250, 246, 0.8);
   line-height: 1.6;
 }
+
+/* TUİK Dashboard */
+.tuik-dashboard-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+  margin-top: 2rem;
+}
+
+@media(min-width: 768px) {
+  .tuik-dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.chart-card {
+  position: relative;
+}
+
+.tuik-expand-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 3;
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(111, 187, 213, 0.35);
+  background: rgba(111, 187, 213, 0.10);
+  color: rgba(244, 250, 246, 0.90);
+  font-family: var(--font-outfit);
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+  transition: 0.2s;
+}
+
+.tuik-expand-btn:hover {
+  background: rgba(111, 187, 213, 0.20);
+  border-color: rgba(111, 187, 213, 0.55);
+  transform: translateY(-1px);
+}
+
+.chart-card-header {
+  font-family: var(--font-cormorant);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: rgba(244, 250, 246, 0.9);
+}
+
+.chart-card-hint {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(244, 250, 246, 0.55);
+}
+
+.chart-card-status {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(244, 250, 246, 0.35);
+}
+
+.chart-canvas {
+  width: 100%;
+  cursor: pointer;
+}
+
+.chart-canvas-line {
+  height: 300px;
+}
+
+.chart-canvas-map {
+  height: 460px;
+}
+
+@media(min-width: 768px) {
+  .chart-canvas-line {
+    height: 340px;
+  }
+}
+
+.chart-card-map {
+  grid-column: 1 / -1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chart-modal-content {
+  max-width: 96rem;
+}
+
+.chart-modal-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.chart-canvas-modal-map {
+  height: 480px;
+}
+
+.chart-modal-info {
+  border-radius: 1rem;
+  border: 1px solid rgba(111, 187, 213, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  color: rgba(244, 250, 246, 0.85);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.chart-canvas-modal-line {
+  height: 460px;
+}

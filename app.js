@@ -293,4 +293,688 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 5. TUİK DASHBOARD (4 grafik + tıklanabilir Türkiye haritası)
+  (async () => {
+    if (!window.echarts) {
+      ['tuik-chart-0-status', 'tuik-chart-1-status', 'tuik-chart-2-status', 'tuik-chart-3-status', 'tuik-map-status']
+        .forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = 'ECharts yüklenemedi. İnternet bağlantısını kontrol edin.';
+        });
+      return;
+    }
+
+    const apiConfigs = [
+      {
+        chartId: 'tuik-chart-0',
+        statusId: 'tuik-chart-0-status',
+        title: 'Emisyon Değişim Oranı',
+        fallbackFile: './data/tuik/ALL-0.md'
+      },
+      {
+        chartId: 'tuik-chart-1',
+        statusId: 'tuik-chart-1-status',
+        title: 'Sera Gazı Emisyonları',
+        fallbackFile: './data/tuik/ALL-1.md'
+      },
+      {
+        chartId: 'tuik-chart-2',
+        statusId: 'tuik-chart-2-status',
+        title: 'İçme-Kullanma Tesisleri',
+        fallbackFile: './data/tuik/ALL-2.md'
+      },
+      {
+        chartId: 'tuik-chart-3',
+        statusId: 'tuik-chart-3-status',
+        title: 'Belediye Su Göstergeleri',
+        fallbackFile: './data/tuik/ALL-3.md'
+      }
+    ];
+
+    const mapCfg = {
+      chartId: 'tuik-map',
+      statusId: 'tuik-map-status',
+      title: 'Türkiye Haritası (Atık Hizmet)',
+      fallbackFile: './data/tuik/ALL-4.md'
+    };
+
+    // Elle (hardcoded) veri: API/parse boşver.
+    const hardcodedSeriesByChartId = {
+      'tuik-chart-0': {
+        unitMeasure: null,
+        times: ["1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"],
+        values: [289.9761921139999,332.954254509,682.848274068,64.80326468800003,568.3517600089996,1258.9008410679996,1641.885704219999,1435.1627355590003,1365.8844328300006,2061.6191984019993,1071.0891392439994,1565.7032180979995,2675.4203414070016,2883.759362463998,3907.248724423999,4696.823256352003,5798.389411478997,5383.5438601219985,5667.996655933997,6533.940696560004,8050.586992368006,8397.522227863996,7925.736148625996,8772.440073882999,8153.051545638999,9249.492677842,9626.276452589003,9680.725732811996,9614.670588475,10735.627550279001,13042.769822873002,13362.729692904995,12848.235051354999,14472.635004344002]
+      },
+      'tuik-chart-1': {
+        unitMeasure: null,
+        times: ["1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"],
+        values: [1506910.0804042134,1559077.3519578287,1608864.8736534563,1664873.559231692,1625041.7246832903,1734456.4499051739,1884937.3721447873,1976178.0489742756,1982376.063618472,1959093.5591968352,2129099.1976315086,1989027.5961482604,2035672.8141010662,2174464.024981008,2239961.517264852,2406590.6523939855,2555520.002140488,2812740.5878407885,2777927.776374536,2826172.190709475,2831748.3106474825,3042796.4294466474,3178821.3553966777,3106667.899557669,3249226.96082514,3401529.6604319895,3570380.9640671546,3767722.466949115,3737327.908406538,3620213.276142032,3706835.858775384,4023198.3187507954,3926956.0349428356,3897811.03485072,4101471.9042972918]
+      },
+      'tuik-chart-2': {
+        unitMeasure: 'PN',
+        times: ["2020","2022","2024"],
+        values: [12482781.872000001,13705121.125999996,14339578.62]
+      },
+      'tuik-chart-3': {
+        unitMeasure: 'BM3',
+        times: ["1994","1995","1996","1997","1998","2001","2002","2003","2004","2006","2008","2010","2012","2014","2016","2018","2020","2022","2024"],
+        values: [153646178.0,155247103.0,156596105.0,163435826.0,166807324.0,194273178.0,196865984.0,201058290.0,208732245.0,227985632.0,232678250.0,250557422.0,267399427.894,291295351.88100004,306480365.56071633,319954534.0247998,327151855.0636893,337173740.4540329,339715055.41267174]
+      }
+    };
+
+    const hardcodedMapSeries = {
+      unitMeasure: 'PN',
+      times: ["2020","2022","2024"],
+      values: [375159406.5055232,379187511.1109411,384903933.37150544]
+    };
+
+    const fmt = (num) => {
+      if (!Number.isFinite(num)) return '-';
+      const abs = Math.abs(num);
+      const toTr = (x) => x.toFixed(2).replace('.', ',');
+      if (abs >= 1000000000) return toTr(num / 1000000000) + ' milyar';
+      if (abs >= 1000000) return toTr(num / 1000000) + ' milyon';
+      if (abs >= 1000) return toTr(num / 1000) + ' bin';
+      return num.toLocaleString('tr-TR', { maximumFractionDigits: 3 });
+    };
+
+    const extractXml = (text) => {
+      const start = text.indexOf('<?xml');
+      if (start !== -1) return text.slice(start);
+      return text;
+    };
+
+    const fetchTextWithTimeout = async (url, timeoutMs) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
+      try {
+        const r = await fetch(url, { method: 'GET', signal: ctrl.signal });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.text();
+      } finally {
+        clearTimeout(t);
+      }
+    };
+
+    const loadCachedTuikXml = async (fallbackFile) => {
+      // Bu projede API bazen tarayıcıda takılabildiği için öncelik her zaman cache'dir.
+      // Cache çalışmıyorsa (HTTP server yoksa) aşağıdaki error mesajı gösterilir.
+      return await fetchTextWithTimeout(fallbackFile, 4500);
+    };
+
+    const parseTuikAggregatedTimeSeries = (xmlText) => {
+      const xml = extractXml(xmlText);
+      const doc = new DOMParser().parseFromString(xml, 'application/xml');
+
+      // Browser XML parse errors show up as <parsererror>.
+      const parserErr = doc.getElementsByTagName('parsererror');
+      if (parserErr && parserErr.length) throw new Error('XML parse error');
+
+      const nodes = Array.from(doc.getElementsByTagName('*'));
+
+      let unitMeasure = null;
+      for (const n of nodes) {
+        if (n.localName !== 'Value') continue;
+        if (n.getAttribute('id') === 'UNIT_MEASURE') {
+          unitMeasure = n.getAttribute('value');
+          break;
+        }
+      }
+
+      // Aggregate all series for the same TIME_PERIOD.
+      const totals = new Map(); // time -> sum(value)
+      for (const n of nodes) {
+        if (n.localName !== 'Obs') continue;
+
+        let time = null;
+        let value = null;
+
+        const children = Array.from(n.children || []);
+        for (const c of children) {
+          if (c.localName === 'ObsDimension' && c.getAttribute('id') === 'TIME_PERIOD') {
+            time = c.getAttribute('value');
+          }
+          if (c.localName === 'ObsValue') {
+            value = c.getAttribute('value');
+          }
+        }
+
+        if (!time) continue;
+        const num = Number(value);
+        if (!Number.isFinite(num)) continue;
+
+        totals.set(time, (totals.get(time) || 0) + num);
+      }
+
+      const times = Array.from(totals.keys()).sort((a, b) => Number(a) - Number(b));
+      const values = times.map(t => totals.get(t));
+
+      return { times, values, unitMeasure };
+    };
+
+    const makeLineOption = (times, values, title, unit) => ({
+      backgroundColor: 'transparent',
+      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(0,0,0,0.75)',
+        borderColor: 'rgba(111,187,213,0.25)',
+        textStyle: { color: 'rgba(244,250,246,0.95)', fontSize: 13 },
+        formatter: (params) => {
+          const p = params && params[0];
+          if (!p) return '';
+          return `${p.axisValueLabel}<br/>${fmt(p.data)} ${unit || ''}`;
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: times,
+        axisLine: { lineStyle: { color: 'rgba(111,187,213,0.25)' } },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 12 },
+        boundaryGap: false
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 12, formatter: (v) => fmt(Number(v)) },
+        splitLine: { lineStyle: { color: 'rgba(111,187,213,0.12)' } }
+      },
+      series: [
+        {
+          name: title,
+          type: 'line',
+          data: values,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { width: 3, color: '#6fbbd5' },
+          itemStyle: { color: '#6fbbd5' }
+        }
+      ]
+    });
+
+    const makeBarOption = (times, values, title, unit) => ({
+      backgroundColor: 'transparent',
+      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(0,0,0,0.75)',
+        borderColor: 'rgba(111,187,213,0.25)',
+        textStyle: { color: 'rgba(244,250,246,0.95)', fontSize: 13 },
+        formatter: (params) => {
+          const p = params && params[0];
+          if (!p) return '';
+          return `${p.axisValueLabel}<br/>${fmt(p.data)} ${unit || ''}`;
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: times,
+        axisLine: { lineStyle: { color: 'rgba(111,187,213,0.25)' } },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 10 },
+        axisTick: { alignWithLabel: true },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 12, formatter: (v) => fmt(Number(v)) },
+        splitLine: { lineStyle: { color: 'rgba(111,187,213,0.12)' } }
+      },
+      series: [
+        {
+          name: title,
+          type: 'bar',
+          data: values,
+          barMaxWidth: 22,
+          itemStyle: { color: '#6fbbd5' }
+        }
+      ]
+    });
+
+    const makeScatterOption = (times, values, title, unit) => ({
+      backgroundColor: 'transparent',
+      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: 'rgba(0,0,0,0.75)',
+        borderColor: 'rgba(111,187,213,0.25)',
+        textStyle: { color: 'rgba(244,250,246,0.95)', fontSize: 13 },
+        formatter: (p) => `${p.data && p.data.x}<br/>${fmt(p.data && p.data.y)} ${unit || ''}`
+      },
+      xAxis: {
+        type: 'category',
+        data: times,
+        axisLine: { lineStyle: { color: 'rgba(111,187,213,0.25)' } },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 10 }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 12, formatter: (v) => fmt(Number(v)) },
+        splitLine: { lineStyle: { color: 'rgba(111,187,213,0.12)' } }
+      },
+      series: [
+        {
+          name: title,
+          type: 'scatter',
+          symbolSize: 10,
+          itemStyle: { color: '#6fbbd5' },
+          data: values.map((v, i) => ({ value: [times[i], v], x: times[i], y: v }))
+        }
+      ]
+    });
+
+    const makePieOption = (times, values, title, unit) => {
+      const sliceCount = 5;
+      const start = Math.max(0, times.length - sliceCount);
+      const pieTimes = times.slice(start);
+      const pieValues = values.slice(start);
+      const data = pieTimes.map((t, i) => ({ name: t, value: pieValues[i] }));
+
+      return {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(0,0,0,0.75)',
+          borderColor: 'rgba(111,187,213,0.25)',
+          textStyle: { color: 'rgba(244,250,246,0.95)', fontSize: 13 },
+          formatter: (p) => `${p.name}<br/>${fmt(p.value)} ${unit || ''}`
+        },
+        legend: {
+          bottom: 6,
+          textStyle: { color: 'rgba(244,250,246,0.65)', fontSize: 10 }
+        },
+        series: [
+          {
+            name: title,
+            type: 'pie',
+            radius: ['45%', '72%'],
+            center: ['50%', '52%'],
+            avoidLabelOverlap: true,
+            itemStyle: { borderColor: 'rgba(111,187,213,0.25)', borderWidth: 1 },
+            label: { color: 'rgba(244,250,246,0.75)', fontSize: 12 },
+            data
+          }
+        ]
+      };
+    };
+
+    const makeDottedLineOption = (times, values, title, unit) => ({
+      backgroundColor: 'transparent',
+      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(0,0,0,0.75)',
+        borderColor: 'rgba(111,187,213,0.25)',
+        textStyle: { color: 'rgba(244,250,246,0.95)', fontSize: 13 },
+        formatter: (params) => {
+          const p = params && params[0];
+          if (!p) return '';
+          return `${p.axisValueLabel}<br/>${fmt(p.data)} ${unit || ''}`;
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: times,
+        axisLine: { lineStyle: { color: 'rgba(111,187,213,0.25)' } },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 10 },
+        boundaryGap: false
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { color: 'rgba(244,250,246,0.55)', fontSize: 12, formatter: (v) => fmt(Number(v)) },
+        splitLine: { lineStyle: { color: 'rgba(111,187,213,0.12)' } }
+      },
+      series: [
+        {
+          name: title,
+          type: 'line',
+          data: values,
+          smooth: false,
+          showSymbol: true,
+          symbol: 'circle',
+          symbolSize: 9,
+          lineStyle: { width: 2, type: 'dashed', color: '#6fbbd5' },
+          itemStyle: { color: '#88cbe0' }
+        }
+      ]
+    });
+
+    const getChartShape = (chartId) => {
+      if (chartId === 'tuik-chart-0') return 'bar';
+      if (chartId === 'tuik-chart-1') return 'pie';
+      if (chartId === 'tuik-chart-2') return 'atrea';
+      if (chartId === 'tuik-chart-3') return 'dotline';
+      return 'line';
+    };
+
+    const makeChartOption = (chartId, times, values, title, unit) => {
+      const shape = getChartShape(chartId);
+      if (shape === 'bar') return makeBarOption(times, values, title, unit);
+      if (shape === 'pie') return makePieOption(times, values, title, unit);
+      if (shape === 'scatter') return makeScatterOption(times, values, title, unit);
+      if (shape === 'dotline') return makeDottedLineOption(times, values, title, unit);
+      return makeLineOption(times, values, title, unit);
+    };
+
+    const makeTurkeyMapOption = (value, unit) => {
+      const map =
+        window.echarts.getMap && (window.echarts.getMap('turkey') || window.echarts.getMap('Turkey'));
+      const features =
+        map && map.geoJson && Array.isArray(map.geoJson.features) ? map.geoJson.features : [];
+
+      const pickRegionName = (props) => {
+        if (!props) return null;
+        const keys = [
+          'name',
+          'NAME',
+          'Name',
+          'NM_1',
+          'NM_2',
+          'NAME_1',
+          'NAME_TR',
+          'name_tr',
+          'name_en',
+          'il_adi',
+          'province'
+        ];
+        for (const k of keys) {
+          if (props[k]) return props[k];
+        }
+        return null;
+      };
+
+      const regionData = features
+        .map((f, idx) => {
+          const props = f && f.properties ? f.properties : {};
+          const n =
+            pickRegionName(props) ||
+            props && (props.name || props.NAME || props.name_tr || props.il_adi || props.province) ||
+            (f && f.id ? String(f.id) : null) ||
+            String(idx);
+          return { name: n, value };
+        })
+        .filter(d => d && d.name);
+
+      // İsimler eşleşmezse bile harita alanları çizilsin diye veri setini yine de dolu tutuyoruz.
+      const safeRegionData = regionData.length ? regionData : [{ name: 'Turkey', value }];
+
+      return {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(0,0,0,0.75)',
+          borderColor: 'rgba(111,187,213,0.25)',
+          textStyle: { color: 'rgba(244,250,246,0.95)' },
+          formatter: (p) => `${p.name}<br/>${fmt(p.value)} ${unit || ''}`
+        },
+        series: [
+          {
+            name: 'Türkiye',
+            type: 'map',
+            map: 'turkey',
+            roam: false,
+            label: { show: false },
+            emphasis: {
+              label: { show: true, color: 'rgba(244,250,246,0.85)', fontSize: 9 },
+              itemStyle: {
+                areaColor: '#88cbe0'
+              }
+            },
+            data: safeRegionData,
+            itemStyle: {
+              borderColor: 'rgba(111,187,213,0.65)',
+              borderWidth: 1,
+              areaColor: '#2a7fa8'
+            },
+          }
+        ]
+      };
+    };
+
+    const chartInstances = [];
+    const resizeAll = () => chartInstances.forEach(c => c && c.resize && c.resize());
+    window.addEventListener('resize', resizeAll);
+
+    const setStatus = (statusId, text, hideAfter = true) => {
+      const el = document.getElementById(statusId);
+      if (!el) return;
+      el.textContent = text;
+      if (hideAfter) setTimeout(() => { el.style.display = 'none'; }, 300);
+    };
+
+    const renderLine = (domId, times, values, title, unit) => {
+      const dom = document.getElementById(domId);
+      if (!dom) return;
+      const chart = window.echarts.init(dom, null, { renderer: 'canvas' });
+      chart.setOption(makeLineOption(times, values, title, unit), true);
+      chartInstances.push(chart);
+      return chart;
+    };
+
+    const renderChart = (domId, chartId, times, values, title, unit) => {
+      const dom = document.getElementById(domId);
+      if (!dom) return;
+      const chart = window.echarts.init(dom, null, { renderer: 'canvas' });
+      chart.setOption(makeChartOption(chartId, times, values, title, unit), true);
+      chartInstances.push(chart);
+      return chart;
+    };
+
+    const renderMap = (domId, value, unit) => {
+      const dom = document.getElementById(domId);
+      if (!dom) return;
+      const chart = window.echarts.init(dom, null, { renderer: 'canvas' });
+      chart.setOption(makeTurkeyMapOption(value, unit), true);
+      chartInstances.push(chart);
+      return chart;
+    };
+
+    // Modal handlers
+    const chartModal = document.getElementById('chart-modal');
+    const chartModalClose = document.getElementById('chart-modal-close');
+    const chartModalMap = document.getElementById('#türk');
+    const chartModalLine = document.getElementById('chart-modal-line');
+    const chartModalInfo = document.getElementById('chart-modal-info');
+
+    let modalMapChart = null;
+    let modalLineChart = null;
+    let mapSeries = null;
+    const lineSeriesByChartId = {};
+
+    const openMapModal = (regionName = 'Türkiye') => {
+      if (!chartModal) return;
+      if (!mapSeries) {
+        if (chartModalInfo) chartModalInfo.textContent = 'Harita verisi yüklenemedi. Lütfen sayfayı bir HTTP server ile açın ve tarayıcı konsolunu kontrol edin.';
+        chartModal.classList.add('active');
+        return;
+      }
+      chartModal.classList.add('active');
+
+      const latestIdx = mapSeries.times.length - 1;
+      const latestYear = mapSeries.times[latestIdx];
+      const latestValue = mapSeries.values[latestIdx];
+
+      const unit = mapSeries.unitMeasure || '';
+      chartModalInfo.innerHTML = `
+        <div style="font-family: var(--font-cormorant); font-size: 1.5rem; font-weight: 700; color: rgba(111,187,213,1); margin-bottom: .5rem;">
+          ${mapCfg.title}
+        </div>
+        <div>Seçili bölge: <b>${regionName}</b></div>
+        <div>Son dönem: <b>${latestYear}</b></div>
+        <div>Değer: <b>${fmt(latestValue)}</b> ${unit}</div>
+        <div style="margin-top:.5rem; color: rgba(244,250,246,0.6); font-size: .9rem;">
+          Not: Bu prototipte tüm seriler aynı TIME_PERIOD’te toplanarak tek bir trend oluşturuldu.
+        </div>
+      `;
+
+      const mapDomId = chartModalMap && chartModalMap.id ? chartModalMap.id : 'chart-modal-map';
+      if (!modalMapChart) {
+        modalMapChart = renderMap(mapDomId, latestValue, unit);
+      } else {
+        modalMapChart.setOption(makeTurkeyMapOption(latestValue, unit), true);
+      }
+
+      if (chartModalMap) chartModalMap.style.display = '';
+
+      if (!modalLineChart) {
+        modalLineChart = renderLine(
+          chartModalLine && chartModalLine.id ? chartModalLine.id : 'chart-modal-line',
+          mapSeries.times,
+          mapSeries.values,
+          mapCfg.title,
+          mapSeries.unitMeasure
+        );
+      } else {
+        modalLineChart.setOption(makeLineOption(mapSeries.times, mapSeries.values, mapCfg.title, mapSeries.unitMeasure), true);
+      }
+
+      // DOM yerleşimi için kısa gecikme.
+      setTimeout(() => {
+        resizeAll();
+        if (modalMapChart && modalMapChart.resize) modalMapChart.resize();
+        if (modalLineChart && modalLineChart.resize) modalLineChart.resize();
+      }, 50);
+    };
+
+    const openLineModal = (chartId) => {
+      if (!chartModal) return;
+      const parsed = lineSeriesByChartId[chartId];
+      if (!parsed) {
+        if (chartModalInfo) chartModalInfo.textContent = 'Veri hazır değil.';
+        chartModal.classList.add('active');
+        return;
+      }
+
+      const cfg = apiConfigs.find(x => x.chartId === chartId) || null;
+      const title = (cfg && cfg.title) ? cfg.title : chartId;
+
+      const unit = parsed.unitMeasure || '';
+      const times = parsed.times;
+      const values = parsed.values;
+      const latestIdx = times.length - 1;
+      const prevIdx = times.length - 2;
+      const latestYear = times[latestIdx];
+      const latestValue = values[latestIdx];
+      const prevValue = values[prevIdx];
+
+      let changeStr = '-';
+      if (Number.isFinite(prevValue) && prevValue !== 0 && Number.isFinite(latestValue)) {
+        const pct = ((latestValue - prevValue) / prevValue) * 100;
+        changeStr = `${fmt(pct)}%`;
+      }
+
+      let minYear = times[0];
+      let maxYear = times[0];
+      let minVal = values[0];
+      let maxVal = values[0];
+      for (let i = 0; i < times.length; i++) {
+        const v = values[i];
+        if (!Number.isFinite(v)) continue;
+        if (v < minVal) { minVal = v; minYear = times[i]; }
+        if (v > maxVal) { maxVal = v; maxYear = times[i]; }
+      }
+
+      chartModal.classList.add('active');
+      if (chartModalMap) chartModalMap.style.display = 'none';
+
+      chartModalInfo.innerHTML = `
+        <div style="font-family: var(--font-cormorant); font-size: 1.5rem; font-weight: 700; color: rgba(111,187,213,1); margin-bottom: .5rem;">
+          ${title}
+        </div>
+        <div>Son dönem: <b>${latestYear}</b></div>
+        <div>Değer: <b>${fmt(latestValue)}</b> ${unit}</div>
+        <div>Önceki yıla göre değişim: <b>${changeStr}</b></div>
+        <div style="margin-top:.5rem; color: rgba(244,250,246,0.6); font-size: .9rem;">
+          Aralık: <b>${minYear}</b> (${fmt(minVal)} ${unit}) → <b>${maxYear}</b> (${fmt(maxVal)} ${unit})
+        </div>
+      `;
+
+      const lineDomId = chartModalLine && chartModalLine.id ? chartModalLine.id : 'chart-modal-line';
+      if (!modalLineChart) {
+        modalLineChart = renderChart(lineDomId, chartId, times, values, title, unit);
+      } else {
+        modalLineChart.setOption(makeChartOption(chartId, times, values, title, unit), true);
+      }
+
+      setTimeout(() => {
+        resizeAll();
+        if (modalLineChart && modalLineChart.resize) modalLineChart.resize();
+      }, 50);
+    };
+
+    if (chartModalClose) {
+      chartModalClose.addEventListener('click', () => chartModal && chartModal.classList.remove('active'));
+    }
+    if (chartModal) {
+      chartModal.addEventListener('click', (e) => {
+        if (e.target === chartModal) chartModal.classList.remove('active');
+      });
+    }
+
+    const tuikMapCard = document.getElementById('tuik-map-card');
+    if (tuikMapCard) {
+      tuikMapCard.addEventListener('click', () => openMapModal('Türkiye'));
+    }
+
+    // Her kartın sağ üstündeki "Büyüt" butonları (tıklanabilirliği görünür yapar).
+    document.querySelectorAll('[data-tuik-expand]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const expandType = btn.getAttribute('data-tuik-expand');
+        const chartId = btn.getAttribute('data-chart-id');
+        if (expandType === 'line' && chartId) openLineModal(chartId);
+        if (expandType === 'map') openMapModal(btn.getAttribute('data-region') || 'Türkiye');
+      });
+    });
+
+    // Load + render (hardcoded)
+    try {
+      apiConfigs.forEach((cfg) => {
+        const parsed = hardcodedSeriesByChartId[cfg.chartId];
+        if (!parsed) {
+          setStatus(cfg.statusId, 'Veri yok', true);
+          return;
+        }
+
+        lineSeriesByChartId[cfg.chartId] = parsed;
+        renderChart(cfg.chartId, cfg.chartId, parsed.times, parsed.values, cfg.title, parsed.unitMeasure);
+        setStatus(cfg.statusId, 'Hazır', true);
+
+        // Tıklayınca modalda büyüt
+        const dom = document.getElementById(cfg.chartId);
+        if (dom) dom.addEventListener('click', () => openLineModal(cfg.chartId));
+      });
+
+      mapSeries = hardcodedMapSeries;
+      const latestIdx = mapSeries.times.length - 1;
+      const latestYear = mapSeries.times[latestIdx];
+      const latestValue = mapSeries.values[latestIdx];
+
+      // Map register'ı var mı kontrol et (turkey.js CDN yüklenmediyse getMap null döner).
+      const mapRegistered =
+        window.echarts.getMap && (window.echarts.getMap('turkey') || window.echarts.getMap('Turkey'));
+      if (!mapRegistered) {
+        setStatus(mapCfg.statusId, 'Türkiye haritası yüklenemedi (turkey.js).', false);
+        return;
+      }
+
+      const mainMapChart = renderMap(mapCfg.chartId, latestValue, mapSeries.unitMeasure);
+      if (mainMapChart && mainMapChart.on) {
+        mainMapChart.on('click', (params) => {
+          const name = params && params.name ? params.name : 'Türkiye';
+          openMapModal(name);
+        });
+      }
+
+      setStatus(mapCfg.statusId, `Hazır (${latestYear})`, true);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      setStatus(mapCfg.statusId, 'Veri işleme hatası', false);
+    }
+  })();
+
+
+
 });
