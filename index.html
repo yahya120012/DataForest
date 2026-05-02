@@ -274,16 +274,16 @@
           <div class="loader-fill" id="loader-fill"></div>
         </div>
         <div class="loader-text" id="loader-text">0 / 150 Yükleniyor... <br>
-                <p class="text-sm text-muted">
-                  yükleme internetinize baglı degişiklik gösterebilir
-                </p>
-                </div>
+          <p class="text-sm text-muted">
+            yükleme internetinize baglı degişiklik gösterebilir
+          </p>
+        </div>
       </div>
 
       <!-- Canvas Sticky Container -->
       <div class="sticky-container">
         <canvas id="hero-canvas"></canvas>
-        
+
 
         <div class="hero-overlays">
           <div class="hero-block" id="hero-block-1">
@@ -300,8 +300,8 @@
           <div class="hero-block" id="hero-block-3">
           </div>
         </div>
-        <img id="hero-mobile-image" class="hero-mobile-image" src="./images/mobil.png"
-          alt="DataForest kahraman görseli" loading="eager" decoding="async"  style="width: 100%; height: 100%;"/>
+        <img id="hero-mobile-image" class="hero-mobile-image" src="./images/mobil.png" alt="DataForest kahraman görseli"
+          loading="eager" decoding="async" style="width: 100%; height: 100%;" />
         <span id="scroll-hint" class="scroll-hint" aria-hidden="true">
           Aşağı kaydır
         </span>
@@ -638,36 +638,94 @@
   <!-- FOOTER -->
   <footer id="footer" class="footer">
     <div class="container container-large">
-      <div class="grid cols-4 gap-10">
-        <div>
+      <!-- Footer Main Content -->
+      <div class="footer-grid">
+        <!-- Column 1: Brand & About -->
+        <div class="footer-column footer-brand-col">
           <div class="footer-brand font-cormorant text-gold-gradient">DataForest</div>
-          <div class="footer-desc">Yapay Zeka Destekli Çevresel Analiz Platformu</div>
+          <div class="footer-desc-main">Yapay Zeka Destekli Çevresel Analiz Platformu</div>
+          <p class="footer-tagline">Açık veri kaynakları ve makine öğrenmesi teknolojileriyle çevresel riskleri erken
+            tespit eden bir karar destek sistemi.</p>
+
+          <!-- Social Links -->
+          <div class="footer-social">
+            <!-- <a href="#" class="social-link" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+              
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+              
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="Twitter">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                
+              </svg>
+            </a>
+            <a href="#" class="social-link" aria-label="E-mail">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                
+              </svg>
+            </a> -->
+          </div>
         </div>
 
-
-        <div class="footer-col">
-          <div class="footer-col-title">Proje</div>
-          <ul>
+        <!-- Column 2: Product -->
+        <div class="footer-column">
+          <div class="footer-col-title">ÜRÜN</div>
+          <ul class="footer-links">
             <li><a href="#heritage">Proje Özeti</a></li>
             <li><a href="#ritual">Analiz İş Akışı</a></li>
-            <li><a href="#showcase">Grafikler</a></li>
-            <li><a href="#footer">Teknik Rapor</a></li>
+            <li><a href="#showcase">Grafikler & Veriler</a></li>
+            <li><a href="#model-results">Model Sonuçları</a></li>
           </ul>
         </div>
 
-        <div class="footer-col">
-          <div class="footer-col-title">Bülten</div>
-          <div class="footer-desc mb-3">Yeni veri setleri ve model güncellemelerinden haberdar ol.</div>
-          <form class="subscribe-form" id="newsletter-form">
-            <input type="email" placeholder="E-posta adresiniz" required>
-            <button type="submit" class="btn btn-small">Abone Ol</button>
-          </form>
+        <!-- Column 3: Resources -->
+        <div class="footer-column">
+          <div class="footer-col-title">KAYNAKLAR</div>
+          <ul class="footer-links">
+            <li><a href="https://www.tuik.gov.tr/" target="_blank">Dokümantasyon</a></li>
+            <li><a href="https://www.tuik.gov.tr/" target="_blank">API Referansı</a></li>
+            <li><a href="https://www.tuik.gov.tr/" target="_blank">Veri Setleri</a></li>
+            <li><a href="https://www.tuik.gov.tr/" target="_blank">Model Yardımı</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Company -->
+        <div class="footer-column">
+          <div class="footer-col-title">ŞİRKET</div>
+          <ul class="footer-links">
+            <li><a href="#heritage">Hakkımızda</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 5: Newsletter -->
+        <div class="footer-column">
+          <div class="footer-col-title">BÜLTENİ ABO OLUN</div>
+          <p class="footer-newsletter-desc">Yeni veri setleri ve model güncellemelerinden ilk siz haberdar olun.</p>
         </div>
       </div>
 
+      <!-- Footer Divider -->
+      <div class="footer-divider"></div>
+
+      <!-- Footer Bottom -->
       <div class="footer-bottom">
-        <div>© 2026 DataForest. Tüm hakları saklıdır.</div>
-        <div>Gizlilik Politikası · Kullanım Koşulları</div>
+        <div class="footer-bottom-left">
+          <p>&copy; 2026 DataForest. Tüm hakları saklıdır.</p>
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Gizlilik Politikası</a>
+          <span class="separator">·</span>
+          <a href="#">Kullanım Koşulları</a>
+          <span class="separator">·</span>
+          <a href="#">Çerezler</a>
+          <span class="separator">·</span>
+          <a href="#">İletişim</a>
+        </div>
       </div>
     </div>
   </footer>
