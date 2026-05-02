@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Outfit:wght@100..900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&display=swap"
     rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
@@ -82,11 +82,31 @@
   font-size: 12px;
 }
 
-.container {
+.chart .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
+}
+
+@media (max-width: 768px) {
+  .chart {
+    min-width: 0;
+    width: 100%;
+    height: 280px;
+    gap: 10px;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .bar {
+    max-width: 22px;
+  }
+
+  .value,
+  .label {
+    font-size: 10px;
+  }
 }
 
 
@@ -123,9 +143,80 @@
   max-height: 90%;
   border-radius: 10px;
 }
+.scroll-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(111, 187, 213, 0.35);
+  background: rgba(5, 14, 25, 0.62);
+  backdrop-filter: blur(10px);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(244, 250, 246, 0.95);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  z-index: 12;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
+  animation: scrollHintFloat 1.8s ease-in-out infinite;
+}
+
+.scroll-hint::after {
+  content: "↓";
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.scroll-hint.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 14px);
+}
+
+@keyframes scrollHintFloat {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 7px); }
+}
+
+@media (max-width: 768px) {
+  .scroll-hint {
+    top: auto;
+    bottom: 1.2rem;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    padding: 0.85rem 1.1rem;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .scroll-hint.is-hidden {
+    transform: translate(-50%, 14px);
+  }
+}
 
 </style>
 <body>
+  <div id="global-loader" class="global-loader" aria-live="polite">
+    <div class="global-loader-card">
+      <div class="global-loader-title">Gorseller hazirlaniyor</div>
+      <div class="global-loader-bar">
+        <div id="global-loader-fill" class="global-loader-fill"></div>
+      </div>
+      <div id="global-loader-text" class="global-loader-text">Yukleniyor...</div>
+    </div>
+  </div>
 
   <!-- NAVBAR -->
   <div class="navbar-wrapper">
@@ -156,22 +247,33 @@
       <!-- Canvas Sticky Container -->
       <div class="sticky-container">
         <canvas id="hero-canvas"></canvas>
+        <img
+          id="hero-mobile-image"
+          class="hero-mobile-image"
+          src="./images/kolonya/ezgif-frame-150.png"
+          alt="DataForest kahraman görseli"
+          loading="eager"
+          decoding="async"
+        />
 
         <div class="hero-overlays">
           <div class="hero-block" id="hero-block-1">
-            <div class="hero-title large">DataForest.</div>
-            <div class="hero-subtitle tracking">Yapay Zeka Destekli Çevresel Risk Analizi</div>
+            <div class="hero-title large"></div>
+            <div class="hero-subtitle tracking"></div>
           </div>
 
           <div class="hero-block" id="hero-block-2">
-            <div class="hero-title">Açık Veriden İçgörüye.</div>
-            <div class="hero-desc">PM2.5, PM10, sıcaklık, karbon salımı ve orman değişimi verileri tek akışta birleşir.
+            <div class="hero-title"></div>
+            <div class="hero-desc">
             </div>
           </div>
 
           <div class="hero-block" id="hero-block-3">
           </div>
         </div>
+        <span id="scroll-hint" class="scroll-hint" aria-hidden="true">
+          Aşağı kaydır
+        </span>
       </div>
     </section>
 
@@ -326,14 +428,13 @@
                 <div id="tuik-chart-3-status" class="chart-card-status">Yükleniyor...</div>
               </div>
 
-              <div class="card chart-card chart-card-map">
-                <div class="chart-card-header">Türkiye Sıcaklık Ortalaması</div>
+              <div class="card chart-card chart-card-map ">
                 <div  class="chart-canvas chart-canvas-map">
                   <div class="chart">
 
                    
 
-                      <div class="container">
+                      <!-- <div class="container">
                         <div class="bar" style="height:120px;"><div class="value">12°</div></div>
                         <div class="label">2012</div>
                       </div>
@@ -391,11 +492,10 @@
                       <div class="container">
                         <div class="bar" style="height:165px;"><div class="value">16.5°</div></div>
                         <div class="label">2023</div>
-                      </div>
+                      </div> -->
                 
                   </div>
                 </div>
-                <div  class="chart-card-status">2012'den itibaren kaydedilen yıllık ortalama sıcaklık değerleri şu şekildedir:</div>
               </div>
             </div>
           </div>
@@ -457,7 +557,7 @@
             <div class="card chart-card">
               <div class="chart-card-header">
                 İçme-Kullanma Tesisleri Degişim Oranının Tahmini
-                <button class="tuik-expand-btn" data-img="images/tahin2.png">
+                <button class="tuik-expand-btn" data-img="images/tahin2.png" onclick="openModal('images/tahin2.png')">
                   Büyüt
                 </button>
               </div>
@@ -469,27 +569,27 @@
               <!-- Kart 3 -->
             <div class="card chart-card">
               <div class="chart-card-header">
-                Sera Gazı Emisyon Değişim Oranının Tahmini
-                <button class="tuik-expand-btn" data-img="images/tahin1.jpeg">
+                Sera Gazı Emisyon Değişim Tahmini
+                <button class="tuik-expand-btn" data-img="images/tahin1.jpeg" onclick="openModal('images/tahin3.png')">
                   Büyüt
                 </button>
               </div>
       
               <div class="chart-canvas">
-                <img src="images/tahin1.jpeg" alt="Sera Gazı">
+                <img src="images/tahin3.png" alt="Sera Gazı">
               </div>
             </div>
             <!-- Kart 4 -->
             <div class="card chart-card">
               <div class="chart-card-header">
-                Sera Gazı Emisyon Değişim Oranının Tahmini
-                <button class="tuik-expand-btn" data-img="images/tahin1.jpeg">
+                Türkiye Arıtılan Suyun-Atık Miktarının Tahmini
+                <button class="tuik-expand-btn" data-img="images/tahin1.jpeg" onclick="openModal('images/tahin4.png')">
                   Büyüt
                 </button>
               </div>
       
               <div class="chart-canvas">
-                <img src="images/tahin1.jpeg" alt="Sera Gazı">
+                <img src="images/tahin4.png" alt="Sera Gazı">
               </div>
             </div>
       

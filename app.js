@@ -1,7 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('page-loading');
+  const globalLoader = document.getElementById('global-loader');
+  const globalLoaderFill = document.getElementById('global-loader-fill');
+  const globalLoaderText = document.getElementById('global-loader-text');
 
   // 1. NAVBAR SCROLL EFFECT
   const navbar = document.getElementById('navbar');
+  const scrollHint = document.getElementById('scroll-hint');
   let rafPending = false;
 
   function onScroll() {
@@ -12,6 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           navbar.classList.remove('scrolled');
         }
+        if (scrollHint) {
+          if (window.scrollY > 10) {
+            scrollHint.classList.add('is-hidden');
+          } else {
+            scrollHint.classList.remove('is-hidden');
+          }
+        }
         rafPending = false;
       });
       rafPending = true;
@@ -19,6 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
+  if (scrollHint) {
+    scrollHint.addEventListener('click', () => {
+      const nextSection = document.getElementById('heritage');
+      if (nextSection) {
+        nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
 
   // Navigation Logic
   document.getElementById('nav-btn').addEventListener('click', () => {
@@ -80,56 +101,158 @@ document.addEventListener('DOMContentLoaded', () => {
   const loaderContainer = document.getElementById('loader');
   const loaderFill = document.getElementById('loader-fill');
   const loaderText = document.getElementById('loader-text');
+  const isMobileViewport = () => window.matchMedia('(max-width: 768px)').matches;
+  const useStaticMobileHero = isMobileViewport();
+  const FRAME_STRIDE = useStaticMobileHero ? 1 : 1;
+  const TARGET_FRAME_COUNT = useStaticMobileHero ? 0 : Math.ceil(TOTAL_FRAMES / FRAME_STRIDE);
+  let lockedMobileViewport = null;
+  const measureViewport = () => {
+    const vv = window.visualViewport;
+    return {
+      vw: Math.round((vv && vv.width) ? vv.width : window.innerWidth),
+      vh: Math.round((vv && vv.height) ? vv.height : window.innerHeight),
+    };
+  };
+  const refreshLockedMobileViewport = () => {
+    if (isMobileViewport()) {
+      lockedMobileViewport = measureViewport();
+    } else {
+      lockedMobileViewport = null;
+    }
+  };
+  const getViewportSize = () => {
+    if (isMobileViewport() && lockedMobileViewport) {
+      return lockedMobileViewport;
+    }
+    return measureViewport();
+  };
 
   let images = [];
   let loadedCount = 0;
   let isLoaded = false;
   let currentFrameIndex = 0;
+  const frameReady = new Array(TOTAL_FRAMES).fill(false);
+  let staticLoadedCount = 0;
+  const staticImages = Array.from(document.querySelectorAll('img')).filter((img) => !img.closest('#global-loader'));
+  const staticImageTarget = staticImages.length;
+  const totalAssetTarget = TARGET_FRAME_COUNT + staticImageTarget;
+  let resolveFramesLoaded;
+  let resolveStaticLoaded;
+  const framesLoadedPromise = new Promise((resolve) => { resolveFramesLoaded = resolve; });
+  const staticLoadedPromise = new Promise((resolve) => { resolveStaticLoaded = resolve; });
+
+  const updateGlobalLoader = () => {
+    if (!globalLoaderFill || !globalLoaderText) return;
+    const loadedAssets = loadedCount + staticLoadedCount;
+    const percent = totalAssetTarget > 0 ? Math.floor((loadedAssets / totalAssetTarget) * 100) : 100;
+    globalLoaderFill.style.width = `${percent}%`;
+    globalLoaderText.textContent = `${loadedAssets} / ${totalAssetTarget} yukleniyor...`;
+  };
+
+  const onStaticImageLoadDone = () => {
+    staticLoadedCount++;
+    updateGlobalLoader();
+    if (staticLoadedCount === staticImageTarget) {
+      resolveStaticLoaded();
+    }
+  };
+
+  if (staticImageTarget === 0) {
+    resolveStaticLoaded();
+  } else {
+    staticImages.forEach((img) => {
+      if (img.complete) {
+        onStaticImageLoadDone();
+        return;
+      }
+      img.addEventListener('load', onStaticImageLoadDone, { once: true });
+      img.addEventListener('error', onStaticImageLoadDone, { once: true });
+    });
+  }
+  updateGlobalLoader();
+  refreshLockedMobileViewport();
+  let lastViewport = getViewportSize();
+  let resizeTimer = null;
 
   function getFrameSrc(i) {
     const safe = Math.min(Math.max(1, Math.floor(i)), TOTAL_FRAMES);
     const num = String(safe).padStart(3, '0');
     // Using correct path
-    return `./images/kolonya/ezgif-frame-${num}.jpg`;
+    return `./images/kolonya/ezgif-frame-${num}.png`;
   }
 
   // Preload images
-  for (let i = 1; i <= TOTAL_FRAMES; i++) {
-    const img = new Image();
-    img.src = getFrameSrc(i);
-    img.onload = onImageLoad;
-    img.onerror = onImageLoad; // Continue even if error
-    images.push(img);
+  if (TARGET_FRAME_COUNT > 0) {
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      const frameIndex = i - 1;
+      if (frameIndex % FRAME_STRIDE !== 0) {
+        images.push(null);
+        continue;
+      }
+      const img = new Image();
+      img.src = getFrameSrc(i);
+      img.onload = () => onImageLoad(frameIndex, true);
+      img.onerror = () => onImageLoad(frameIndex, false); // Continue even if error
+      images.push(img);
+    }
+  } else {
+    resolveFramesLoaded();
   }
 
-  function onImageLoad() {
+  function onImageLoad(frameIndex, ok) {
     loadedCount++;
-    const percent = Math.floor((loadedCount / TOTAL_FRAMES) * 100);
+    frameReady[frameIndex] = ok;
+    const percent = Math.floor((loadedCount / TARGET_FRAME_COUNT) * 100);
     loaderFill.style.width = `${percent}%`;
-    loaderText.innerText = `${loadedCount} / ${TOTAL_FRAMES} Yükleniyor...`;
+    loaderText.innerText = `${loadedCount} / ${TARGET_FRAME_COUNT} Yükleniyor...`;
+    updateGlobalLoader();
 
-    if (loadedCount === TOTAL_FRAMES) {
-      isLoaded = true;
-      loaderContainer.style.opacity = 0;
-      setTimeout(() => {
-        loaderContainer.style.display = 'none';
-        renderFrame(0);
-        updateOverlays();
-      }, 500);
+    if (loadedCount === TARGET_FRAME_COUNT) {
+      loaderText.innerText = 'Hazır';
+      resolveFramesLoaded();
     }
   }
+
+  function getNearestReadyFrameIndex(targetIndex) {
+    if (frameReady[targetIndex]) return targetIndex;
+    for (let d = 1; d < TOTAL_FRAMES; d++) {
+      const left = targetIndex - d;
+      const right = targetIndex + d;
+      if (left >= 0 && frameReady[left]) return left;
+      if (right < TOTAL_FRAMES && frameReady[right]) return right;
+    }
+    return 0;
+  }
+
+  Promise.all([framesLoadedPromise, staticLoadedPromise]).then(() => {
+    isLoaded = true;
+    currentFrameIndex = 0;
+    if (!useStaticMobileHero) {
+      renderFrame(currentFrameIndex);
+      updateOverlays();
+    }
+    if (loaderContainer) {
+      loaderContainer.style.opacity = 0;
+      loaderContainer.style.display = 'none';
+    }
+    if (globalLoader) {
+      globalLoader.classList.add('hidden');
+    }
+    document.body.classList.remove('page-loading');
+  });
 
   function renderFrame(index) {
     if (!isLoaded || !ctx) return;
 
-    const img = images[index];
+    const safeIndex = getNearestReadyFrameIndex(index);
+    const img = images[safeIndex];
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const maxDpr = isMobileViewport() ? 1.6 : 3;
+    const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
 
 
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const { vw, vh } = getViewportSize();
 
 
     canvas.style.width = vw + 'px';
@@ -171,7 +294,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('resize', () => {
-    if (isLoaded) renderFrame(currentFrameIndex);
+    if (useStaticMobileHero) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const wasMobile = isMobileViewport();
+      const nextViewport = getViewportSize();
+      const widthDiff = Math.abs(nextViewport.vw - lastViewport.vw);
+      const heightDiff = Math.abs(nextViewport.vh - lastViewport.vh);
+      const rawViewport = measureViewport();
+
+      // Update lock on meaningful layout changes (rotate, split-screen, zoom-level jumps).
+      if (!wasMobile || widthDiff >= 2 || heightDiff >= 120) {
+        refreshLockedMobileViewport();
+      }
+      lastViewport = getViewportSize();
+
+      // Ignore tiny mobile viewport changes caused by browser bars.
+      const rawWidthDiff = Math.abs(rawViewport.vw - nextViewport.vw);
+      const rawHeightDiff = Math.abs(rawViewport.vh - nextViewport.vh);
+      if (wasMobile && rawWidthDiff < 2 && rawHeightDiff < 120) {
+        return;
+      }
+
+      if (isLoaded) renderFrame(currentFrameIndex);
+    }, 120);
+  });
+
+  window.addEventListener('orientationchange', () => {
+    if (useStaticMobileHero) return;
+    setTimeout(() => {
+      refreshLockedMobileViewport();
+      lastViewport = getViewportSize();
+      if (isLoaded) renderFrame(currentFrameIndex);
+    }, 250);
   });
 
   // Calculate scroll index mapped to canvas
@@ -181,7 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const wrapRect = sequenceWrapper.getBoundingClientRect();
     // Wrap height is 500vh. When wrapRect.top is 0, progress = 0
     // When wrapRect.bottom = window.innerHeight, progress = 1
-    const totalScrollRange = wrapRect.height - window.innerHeight;
+    const { vh } = getViewportSize();
+    const totalScrollRange = wrapRect.height - vh;
     if (totalScrollRange <= 0) return 0;
 
     let progress = -wrapRect.top / totalScrollRange;
@@ -238,12 +394,17 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', () => {
     if (!scrollRaf) {
       window.requestAnimationFrame(() => {
+        if (useStaticMobileHero) {
+          scrollRaf = false;
+          return;
+        }
         let progress = getScrollProgress();
 
         let frameIndex = Math.min(
           TOTAL_FRAMES - 1,
           Math.max(0, Math.floor(progress * (TOTAL_FRAMES - 1)))
         );
+        frameIndex = Math.floor(frameIndex / FRAME_STRIDE) * FRAME_STRIDE;
 
         if (frameIndex !== currentFrameIndex) {
           currentFrameIndex = frameIndex;
@@ -452,9 +613,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return { times, values, unitMeasure };
     };
 
+    const chartGrid = () => ({
+      left: isMobileViewport() ? 56 : 64,
+      right: isMobileViewport() ? 18 : 22,
+      top: 18,
+      bottom: 36,
+      containLabel: true
+    });
+
     const makeLineOption = (times, values, title, unit) => ({
       backgroundColor: 'transparent',
-      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      grid: chartGrid(),
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(0,0,0,0.75)',
@@ -494,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const makeBarOption = (times, values, title, unit) => ({
       backgroundColor: 'transparent',
-      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      grid: chartGrid(),
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(0,0,0,0.75)',
@@ -532,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const makeScatterOption = (times, values, title, unit) => ({
       backgroundColor: 'transparent',
-      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      grid: chartGrid(),
       tooltip: {
         trigger: 'item',
         backgroundColor: 'rgba(0,0,0,0.75)',
@@ -600,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const makeDottedLineOption = (times, values, title, unit) => ({
       backgroundColor: 'transparent',
-      grid: { left: 44, right: 14, top: 16, bottom: 34 },
+      grid: chartGrid(),
       tooltip: {
         trigger: 'axis',
         backgroundColor: 'rgba(0,0,0,0.75)',
@@ -734,7 +903,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const chartInstances = [];
     const resizeAll = () => chartInstances.forEach(c => c && c.resize && c.resize());
-    window.addEventListener('resize', resizeAll);
+    let chartResizeTimer = null;
+    let lastChartViewport = getViewportSize();
+    window.addEventListener('resize', () => {
+      clearTimeout(chartResizeTimer);
+      chartResizeTimer = setTimeout(() => {
+        const nextViewport = getViewportSize();
+        const widthDiff = Math.abs(nextViewport.vw - lastChartViewport.vw);
+        const heightDiff = Math.abs(nextViewport.vh - lastChartViewport.vh);
+        lastChartViewport = nextViewport;
+
+        if (isMobileViewport() && widthDiff < 2 && heightDiff < 120) {
+          return;
+        }
+        resizeAll();
+      }, 120);
+    });
 
     const setStatus = (statusId, text, hideAfter = true) => {
       const el = document.getElementById(statusId);
