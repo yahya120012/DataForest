@@ -103,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const loaderText = document.getElementById('loader-text');
   const isMobileViewport = () => window.matchMedia('(max-width: 768px)').matches;
   const useStaticMobileHero = isMobileViewport();
-  const FRAME_STRIDE = useStaticMobileHero ? 1 : 1;
+  // Optimize: Use stride=3 on mobile (50 frames), stride=2 on desktop (75 frames)
+  const FRAME_STRIDE = useStaticMobileHero ? 1 : (window.innerWidth < 1024 ? 3 : 2);
   const TARGET_FRAME_COUNT = useStaticMobileHero ? 0 : Math.ceil(TOTAL_FRAMES / FRAME_STRIDE);
   let lockedMobileViewport = null;
   const measureViewport = () => {
@@ -132,14 +133,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let isLoaded = false;
   let currentFrameIndex = 0;
   const frameReady = new Array(TOTAL_FRAMES).fill(false);
+  const frameLoading = new Array(TOTAL_FRAMES).fill(false); // Track which frames are loading
   let staticLoadedCount = 0;
   const staticImages = Array.from(document.querySelectorAll('img')).filter((img) => !img.closest('#global-loader') && img.src && img.src.trim() !== '');
-  const staticImageTarget = staticImages.length -= 1;
+  const staticImageTarget = staticImages.length - 1;
   const totalAssetTarget = TARGET_FRAME_COUNT;
   let resolveFramesLoaded;
   let resolveStaticLoaded;
   const framesLoadedPromise = new Promise((resolve) => { resolveFramesLoaded = resolve; });
   const staticLoadedPromise = new Promise((resolve) => { resolveStaticLoaded = resolve; });
+
+  // Progressive loading: prioritize first 30 frames, load rest in background
+  const PRIORITY_FRAMES = 30;
+  const PREFETCH_RANGE = 40; // Prefetch 40 frames around scroll position
+  let priorityLoaded = 0;
 
   const updateGlobalLoader = () => {
     if (!globalLoaderFill || !globalLoaderText) return;
@@ -177,23 +184,74 @@ document.addEventListener('DOMContentLoaded', () => {
   function getFrameSrc(i) {
     const safe = Math.min(Math.max(1, Math.floor(i)), TOTAL_FRAMES);
     const num = String(safe).padStart(3, '0');
-    // Using correct path
     return `./images/kolonya/ezgif-frame-${num}.webp`;
   }
 
-  // Preload images
+  // Progressive image loading
   if (TARGET_FRAME_COUNT > 0) {
+    // First pass: load priority frames (first 30)
+    const priorityIndexes = [];
+    const backgoundIndexes = [];
+    
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       const frameIndex = i - 1;
       if (frameIndex % FRAME_STRIDE !== 0) {
         images.push(null);
         continue;
       }
+      if (frameIndex < PRIORITY_FRAMES) {
+        priorityIndexes.push(i);
+      } else {
+        backgoundIndexes.push(i);
+      }
+    }
+
+    // Load priority frames immediately
+    priorityIndexes.forEach(i => {
+      const frameIndex = i - 1;
+      frameLoading[frameIndex] = true;
       const img = new Image();
       img.src = getFrameSrc(i);
       img.onload = () => onImageLoad(frameIndex, true);
-      img.onerror = () => onImageLoad(frameIndex, false); // Continue even if error
-      images.push(img);
+      img.onerror = () => onImageLoad(frameIndex, false);
+      images[frameIndex] = img;
+    });
+
+    // Load background frames in batches with higher priority
+    if (backgoundIndexes.length > 0) {
+      // Batch load in smaller groups for better responsiveness
+      const batchSize = 8;
+      let batchIndex = 0;
+      
+      const loadNextBatch = () => {
+        const start = batchIndex * batchSize;
+        const end = Math.min(start + batchSize, backgoundIndexes.length);
+        
+        for (let j = start; j < end; j++) {
+          const i = backgoundIndexes[j];
+          const frameIndex = i - 1;
+          if (!frameLoading[frameIndex]) {
+            frameLoading[frameIndex] = true;
+            const img = new Image();
+            img.src = getFrameSrc(i);
+            img.onload = () => onImageLoad(frameIndex, true);
+            img.onerror = () => onImageLoad(frameIndex, false);
+            images[frameIndex] = img;
+          }
+        }
+        
+        batchIndex++;
+        if (batchIndex * batchSize < backgoundIndexes.length) {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadNextBatch);
+          } else {
+            setTimeout(loadNextBatch, 200);
+          }
+        }
+      };
+      
+      // Start batching with delay
+      setTimeout(loadNextBatch, 300);
     }
   } else {
     resolveFramesLoaded();
@@ -202,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function onImageLoad(frameIndex, ok) {
     loadedCount++;
     frameReady[frameIndex] = ok;
+    frameLoading[frameIndex] = false;
     const percent = Math.floor((loadedCount / TARGET_FRAME_COUNT) * 100);
     loaderFill.style.width = `${percent}%`;
     loaderText.innerText = `${loadedCount} / ${TARGET_FRAME_COUNT} Yükleniyor...`;
@@ -210,6 +269,32 @@ document.addEventListener('DOMContentLoaded', () => {
       loaderText.innerText = 'Hazır';
       resolveFramesLoaded();
     }
+  }
+
+  // Prefetch frames around scroll position for faster scrolling
+  function prefetchFrames(centerFrameIndex) {
+    const framesToLoad = [];
+    
+    // Prefetch range: from (center - PREFETCH_RANGE) to (center + PREFETCH_RANGE)
+    const startFrame = Math.max(0, centerFrameIndex - PREFETCH_RANGE);
+    const endFrame = Math.min(TOTAL_FRAMES - 1, centerFrameIndex + PREFETCH_RANGE);
+    
+    for (let frameIdx = startFrame; frameIdx <= endFrame; frameIdx++) {
+      if (frameIdx % FRAME_STRIDE === 0 && !frameReady[frameIdx] && !frameLoading[frameIdx]) {
+        framesToLoad.push(frameIdx);
+      }
+    }
+    
+    // Load frames immediately (not in background)
+    framesToLoad.forEach(frameIdx => {
+      frameLoading[frameIdx] = true;
+      const i = frameIdx + 1;
+      const img = new Image();
+      img.src = getFrameSrc(i);
+      img.onload = () => onImageLoad(frameIdx, true);
+      img.onerror = () => onImageLoad(frameIdx, false);
+      images[frameIdx] = img;
+    });
   }
 
   function getNearestReadyFrameIndex(targetIndex) {
@@ -250,9 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxDpr = isMobileViewport() ? 1.6 : 3;
     const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
 
-
     const { vw, vh } = getViewportSize();
-
 
     canvas.style.width = vw + 'px';
     canvas.style.height = vh + 'px';
@@ -266,9 +349,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Optimize: Use "low" quality for better performance on 150 frames
     ctx.imageSmoothingEnabled = true;
     if ('imageSmoothingQuality' in ctx) {
-      ctx.imageSmoothingQuality = 'high';
+      ctx.imageSmoothingQuality = 'low';
     }
     ctx.clearRect(0, 0, vw, vh);
 
@@ -409,6 +493,9 @@ document.addEventListener('DOMContentLoaded', () => {
           currentFrameIndex = frameIndex;
           renderFrame(currentFrameIndex);
         }
+
+        // Prefetch frames around scroll position for faster scrolling
+        prefetchFrames(frameIndex);
 
         // Update texts synchronously on scroll
         updateOverlays();
