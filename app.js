@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const safe = Math.min(Math.max(1, Math.floor(i)), TOTAL_FRAMES);
     const num = String(safe).padStart(3, '0');
     // Using correct path
-    return `./images/kolonya/ezgif-frame-${num}.png`;
+    return `./images/kolonya/ezgif-frame-${num}.Webp`;
   }
 
   // Preload images
